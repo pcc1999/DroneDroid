@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="flightPlanSelected"
+            type="com.upc.dronedroid.models.FlightPlan" />
+
+        <variable
+            name="flightPlanPositionSelected"
+            type="int" />
+
+        <variable
+            name="isEditable"
+            type="Boolean" />
+
+        <variable
+            name="isCreating"
+            type="Boolean" />
+
+        <variable
+            name="canRunPlan"
+            type="Boolean" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ui.FlightPlansTabletActivity">
+
+        <LinearLayout
+            android:id="@+id/flightPlansMainLayoutTable"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <org.osmdroid.views.MapView
+                android:id="@+id/OSMView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight=".2" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/linearLayout5"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight=".7"
+                android:divider="?android:dividerHorizontal"
+                android:showDividers="middle">
+
+                <LinearLayout
+                    android:id="@+id/linearLayout6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="1dp"
+                    android:orientation="horizontal"
+                    app:layout_constraintBottom_toTopOf="@+id/availableFPs"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <ImageButton
+                        android:id="@+id/imageButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:enabled="@{!isEditable}"
+                        android:onClick="onNewClick"
+                        app:backgroundTint="#00FFFFFF"
+                        app:iconTint="@{!isEditable ? @color/black : @color/gray}"
+                        app:srcCompat="@{isCreating ? @drawable/ic_save_item_1411_svgrepo_com : @drawable/ic_create_svgrepo_com}"
+                        app:strokeColor="#000000"
+                        app:strokeWidth="2dp" />
+
+                    <ImageButton
+                        android:id="@+id/imageButton2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:enabled="@{flightPlanSelected!=null}"
+                        android:onClick="onDeleteClick"
+                        app:backgroundTint="#00FFFFFF"
+                        app:iconTint="@{flightPlanSelected!=null ? @color/black : @color/gray}"
+                        app:srcCompat="@drawable/ic_delete_fp_svgrepo_com"
+                        app:strokeColor="#000000"
+                        app:strokeWidth="2dp" />
+
+                    <ImageButton
+                        android:id="@+id/imageButton3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:enabled="@{flightPlanSelected!=null &amp;&amp; !isCreating}"
+                        android:onClick="onEditClick"
+                        app:backgroundTint="#00FFFFFF"
+                        app:iconTint="@{flightPlanSelected!=null &amp;&amp; !isCreating ? @color/black : @color/gray}"
+                        app:srcCompat="@{isEditable ? @drawable/ic_save_item_1411_svgrepo_com : @drawable/ic_edit_pencil_02_svgrepo_com}"
+                        app:strokeColor="#000000"
+                        app:strokeWidth="2dp" />
+
+                    <ImageButton
+                        android:id="@+id/imageButton4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:enabled="@{flightPlanSelected!=null &amp;&amp; !isCreating &amp;&amp; !isEditable}"
+                        android:onClick="onExportClick"
+                        app:backgroundTint="#00FFFFFF"
+                        app:iconTint="@{flightPlanSelected!=null &amp;&amp; !isCreating &amp;&amp; !isEditable ? @color/black : @color/gray}"
+                        app:srcCompat="@drawable/ic_export_svgrepo_com"
+                        app:strokeColor="#000000"
+                        app:strokeWidth="2dp" />
+
+                    <ImageButton
+                        android:id="@+id/imageButton5"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:enabled="@{flightPlanSelected!=null &amp;&amp; !isCreating &amp;&amp; !isEditable &amp;&amp; canRunPlan}"
+                        android:onClick="onRunClick"
+                        app:backgroundTint="#00FFFFFF"
+                        app:iconTint="@{flightPlanSelected!=null &amp;&amp; !isCreating &amp;&amp; !isEditable &amp;&amp; canRunPlan ? @color/black : @color/gray}"
+                        app:srcCompat="@drawable/ic_run_all_svgrepo_com"
+                        app:strokeColor="#000000"
+                        app:strokeWidth="2dp" />
+
+                </LinearLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/availableFPs"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_marginStart="5dp"
+                    app:layout_constraintBottom_toTopOf="@id/flightPlanData"
+                    app:layout_constraintEnd_toEndOf="@+id/linearLayout6"
+                    app:layout_constraintStart_toStartOf="@+id/linearLayout6"
+                    app:layout_constraintTop_toBottomOf="@+id/linearLayout6">
+
+                </androidx.recyclerview.widget.RecyclerView>
+
+                <TableLayout
+                    android:id="@+id/flightPlanData"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="1dp"
+                    android:visibility="@{flightPlanSelected!=null ? @integer/visible : @integer/invisible}"
+                    app:layout_constraintBottom_toTopOf="@+id/waypoints"
+                    app:layout_constraintEnd_toEndOf="@+id/waypoints"
+                    app:layout_constraintStart_toStartOf="@+id/availableFPs"
+                    app:layout_constraintTop_toBottomOf="@+id/availableFPs">
+
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <TextView
+                            android:id="@+id/textView4"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Name" />
+
+                        <Space
+                            android:layout_width="10dp"
+                            android:layout_height="wrap_content" />
+
+                        <EditText
+                            android:id="@+id/editTextFPName"
+                            style="@style/Widget.AppCompat.TextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:enabled="@{isEditable || isCreating}"
+                            android:inputType="textPersonName"
+                            android:maxLength="12"
+                            android:text="@={flightPlanSelected.name}" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <TextView
+                            android:id="@+id/textView5"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/createdOn" />
+
+                        <Space
+                            android:layout_width="10dp"
+                            android:layout_height="wrap_content" />
+
+                        <TextView
+                            android:id="@+id/editTextFPName2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@{flightPlanSelected.creationDate.toLocaleString()}" />
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <TextView
+                            android:id="@+id/textView6"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/lastModifiedOn" />
+
+                        <Space
+                            android:layout_width="10dp"
+                            android:layout_height="wrap_content" />
+
+                        <TextView
+                            android:id="@+id/editTextFPName3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@{flightPlanSelected.lastModifiedDate.toLocaleString()}" />
+                    </TableRow>
+
+                </TableLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/waypoints"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:visibility="@{flightPlanSelected!=null ? @integer/visible : @integer/invisible}"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="@+id/availableFPs"
+                    app:layout_constraintStart_toStartOf="@+id/availableFPs"
+                    app:layout_constraintTop_toBottomOf="@+id/flightPlanData" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

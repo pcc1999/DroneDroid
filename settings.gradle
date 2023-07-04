@@ -1,0 +1,9 @@
+rootProject.name = "Dronedroid"
+include ':app'
+include ':openCVLibrary340'
+include ':Mavlink'
+include ':UsbSerialLibrary'
+include ':dronekit302'
+project(':dronekit302').projectDir = new File(rootDir, 'dronekit-android.3.0.2/ClientLib')
+project(':Mavlink').projectDir = new File(rootDir, 'dronekit-android.3.0.2/dependencyLibs/Mavlink/')
+project(':UsbSerialLibrary').projectDir = new File(rootDir, 'dronekit-android.3.0.2/dependencyLibs/UsbSerialLibrary/')

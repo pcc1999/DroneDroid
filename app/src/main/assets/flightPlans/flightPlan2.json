@@ -1,0 +1,18 @@
+{
+  "id": "44e128a5-ac7a-4c9a-be4c-224b6bf2i36d",
+  "name": "testFP2",
+  "creationDate": "20230319220412",
+  "lastModifiedDate": "20230323100529",
+  "waypoints": [
+    {
+      "lat": 41.124567,
+      "lon": 1.988914,
+      "takePic": true
+    },
+    {
+      "lat": 41.124589,
+      "lon": 1.988919,
+      "takePic": false
+    }
+  ]
+}

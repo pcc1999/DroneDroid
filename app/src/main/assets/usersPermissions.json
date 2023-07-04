@@ -1,0 +1,35 @@
+{
+  "users": [
+    {
+      "username": "Demo User",
+      "needsPassword": false,
+      "password": "",
+      "canCreateRoutes": false,
+      "canLoadRoutes": true,
+      "canDeleteRoutes": false,
+      "canUsePad": true,
+      "canUseGyroscope": false,
+      "canUseSteeringMode": false
+    }, {
+      "username": "Standard User",
+      "needsPassword": true,
+      "password": "userPassword",
+      "canCreateRoutes": true,
+      "canLoadRoutes": true,
+      "canDeleteRoutes": false,
+      "canUsePad": true,
+      "canUseGyroscope": true,
+      "canUseSteeringMode": false
+    }, {
+      "username": "Admin User",
+      "needsPassword": true,
+      "password": "adminPassword",
+      "canCreateRoutes": true,
+      "canLoadRoutes": true,
+      "canDeleteRoutes": true,
+      "canUsePad": true,
+      "canUseGyroscope": true,
+      "canUseSteeringMode": true
+    }
+  ]
+}

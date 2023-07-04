@@ -1,0 +1,61 @@
+<resources>
+    <string name="app_name">Drone Droid</string>
+    <string name="password">Password</string>
+    <string name="login">Login</string>
+    <string name="user">User</string>
+    <string-array name="availableUsers">
+        <item>Please select an user to log in</item>
+        <item>Demo User</item>
+        <item>Standard User</item>
+        <item>Admin User</item>
+    </string-array>
+    <string name="title_activity_picture">PictureActivity</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+
+    <string name="in_land">In land</string>
+    <string name="in_air">In air</string>
+
+    <string name="auto_connected">Autopilot connected</string>
+    <string name="auto_disconnected">Autopilot disconnected</string>
+
+    <string name="drone_armed">Drone armed</string>
+    <string name="drone_disarmed">Drone disarmed</string>
+
+    <string name="mqtt_broker">MQTT Broker</string>
+    <string name="connection_string">Connection String</string>
+
+    <string name="conn_status">Connection Status</string>
+    <string name="telemetry_info">Telemetry Info</string>
+
+    <string name="arm_drone">ARM DRONE</string>
+    <string name="disarm_drone">DISARM DRONE</string>
+    <string name="take_off">TAKE OFF</string>
+    <string name="land">LAND</string>
+    <string name="RTL">RETURN TO LAUNCH</string>
+
+    <string name="altitude">Altitude</string>
+    <string name="battery">Battery</string>
+    <string name="speed">Speed</string>
+    <string name="heading">Heading</string>
+
+    <string name="no_filters">NO FILTERS</string>
+    <string name="back">BACK</string>
+
+    <string name="createdOn">Created On</string>
+    <string name="lastModifiedOn">Last modified on</string>
+
+    <string name="importLocal">Import from local storage</string>
+    <string name="fromScratch">Create new from scratch</string>
+
+    <string name="steeringSwitch">Steering Wheel mode</string>
+
+    <integer name="visible">0</integer>
+    <integer name="invisible">4</integer>
+</resources>
