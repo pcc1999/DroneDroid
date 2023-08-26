@@ -10,7 +10,11 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -23,6 +27,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.BindingAdapter;
@@ -45,18 +50,22 @@ import com.google.gson.JsonParser;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
+import org.osmdroid.tileprovider.tilesource.XYTileSource;
 import org.osmdroid.tileprovider.tilesource.bing.BingMapTileSource;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapController;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Objects;
 
 import javax.net.ssl.SSLContext;
 
@@ -191,6 +200,8 @@ public class TabletActivity extends AppCompatActivity {
     private Integer tileSelected = 0;
     private SensorManager sensorManager;
     private Sensor sensor;
+    // Base path for osmdroid files. Zip files are in this folder.
+
 
     @BindingAdapter("tint")
     public static void setColorFilter(ImageView img, Integer color) {
@@ -210,6 +221,12 @@ public class TabletActivity extends AppCompatActivity {
     @SuppressLint({"UseCompatLoadingForDrawables", "WrongConstant"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+        // Base path for tiles.
+        File OSMDROID_PATH = new File(this.getExternalFilesDir("offlineMaps").toURI());
+        File TILE_PATH_BASE = new File(OSMDROID_PATH, "tiles");
+        Configuration.getInstance().setOsmdroidBasePath(OSMDROID_PATH);
+        Configuration.getInstance().setOsmdroidTileCache(TILE_PATH_BASE);
         super.onCreate(savedInstanceState);
         //Timber.plant(new Timber.DebugTree());
         tabletBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
@@ -238,9 +255,20 @@ public class TabletActivity extends AppCompatActivity {
         //Populate tilesMap
         tilesMap.put("Open Street Maps", TileSourceFactory.MAPNIK);
         tilesMap.put("Topographic", TileSourceFactory.OpenTopo);
-        tilesMap.put("Bing - Hybrid", null);
-        tilesMap.put("Bing - Road", null);
-        tilesMap.put("Bing - Aerial", null);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            //Workaround for a bug detected with Bing maps SDK 21-
+            tilesMap.put("Bing - Hybrid", null);
+            tilesMap.put("Bing - Road", null);
+            tilesMap.put("Bing - Aerial", null);
+        }
+        //Get offline map providers based on content files on /files/offlineMaps
+        File mapsDirectory = new File(this.getExternalFilesDir("offlineMaps").toURI());
+        for (File offlineMapFile : Objects.requireNonNull(mapsDirectory.listFiles())) {
+            if(offlineMapFile.isFile()) {
+                tilesMap.put("Offline - " + offlineMapFile.getName().split("\\.")[0], null);
+            }
+        }
+
         // Workaround in order to force TLS v1.2 in Android 4.0 (minSDK is 15)
         try {
             ProviderInstaller.installIfNeeded(getApplicationContext());
@@ -269,7 +297,6 @@ public class TabletActivity extends AppCompatActivity {
         //Set marker for user's position
         Marker userMarker = new Marker(map);
         userMarker.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_map_pin_svgrepo_com));
-        //userMarker.setIcon(this.getResources().getDrawable(R.drawable.ic_map_pin_svgrepo_com));
         userMarker.setId("user");
         userMarker.setOnMarkerClickListener(null);
         userMarker.setOnMarkerDragListener(null);
@@ -510,23 +537,32 @@ public class TabletActivity extends AppCompatActivity {
                 public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                     //Semaphore to allow opening the spinner
                     if (spinnerOpened) {
-                        if (!tilesMap.keySet().toArray()[position].toString().contains("Bing")) {
+                        MapView mapView = findViewById(R.id.OSMView);
+                        if (!tilesMap.keySet().toArray()[position].toString().contains("-")) {
+                            mapView.setUseDataConnection(true); //optional, but a good way to prevent loading from the network and test your zip loading.
                             MapUtil.setTiles(findViewById(R.id.OSMView), tilesMap.get(tilesMap.keySet().toArray()[position]));
                         } else {
-                            MapView mapView = findViewById(R.id.OSMView);
-                            org.osmdroid.tileprovider.tilesource.bing.BingMapTileSource.retrieveBingKey(getApplicationContext());
+                            mapView.setUseDataConnection(true); //optional, but a good way to prevent loading from the network and test your zip loading.
+                            if (tilesMap.keySet().toArray()[position].toString().contains("Bing")) {
+                                org.osmdroid.tileprovider.tilesource.bing.BingMapTileSource.retrieveBingKey(getApplicationContext());
 
-                            org.osmdroid.tileprovider.tilesource.bing.BingMapTileSource bing = new org.osmdroid.tileprovider.tilesource.bing.BingMapTileSource(null);
-                            //Bing maps are handled in a different way
-                            if (tilesMap.keySet().toArray()[position].toString().contains("Aerial")) {
-                                bing.setStyle(BingMapTileSource.IMAGERYSET_AERIAL);
-                                mapView.setTileSource(bing);
-                            } else if (tilesMap.keySet().toArray()[position].toString().contains("Hybrid")) {
-                                bing.setStyle(BingMapTileSource.IMAGERYSET_AERIALWITHLABELS);
-                                mapView.setTileSource(bing);
-                            } else if (tilesMap.keySet().toArray()[position].toString().contains("Road")) {
-                                bing.setStyle(BingMapTileSource.IMAGERYSET_ROAD);
-                                mapView.setTileSource(bing);
+                                org.osmdroid.tileprovider.tilesource.bing.BingMapTileSource bing = new org.osmdroid.tileprovider.tilesource.bing.BingMapTileSource(null);
+                                //Bing maps are handled in a different way
+                                if (tilesMap.keySet().toArray()[position].toString().contains("Aerial")) {
+                                    bing.setStyle(BingMapTileSource.IMAGERYSET_AERIAL);
+                                    mapView.setTileSource(bing);
+                                } else if (tilesMap.keySet().toArray()[position].toString().contains("Hybrid")) {
+                                    bing.setStyle(BingMapTileSource.IMAGERYSET_AERIALWITHLABELS);
+                                    mapView.setTileSource(bing);
+                                } else if (tilesMap.keySet().toArray()[position].toString().contains("Road")) {
+                                    bing.setStyle(BingMapTileSource.IMAGERYSET_ROAD);
+                                    mapView.setTileSource(bing);
+                                }
+                            } else if (tilesMap.keySet().toArray()[position].toString().contains("Offline")) {
+                                //Get from internal storage
+                                mapView.setTileSource(new XYTileSource(tilesMap.keySet().toArray()[position].toString().split(" - ")[1], 1, 17, 256, ".jpg", new String[]{""}));
+                            } else {
+                                //Should not fall here as there aren't more types of providers
                             }
                         }
                         tileSelected = position;
@@ -561,7 +597,6 @@ public class TabletActivity extends AppCompatActivity {
         } else {
             //Set the callback for the Sensor Event
             sensorManager.registerListener(gyroListener, sensor, SensorManager.SENSOR_DELAY_NORMAL);
-            //sensorManager.registerListener(gyroListener, sensor, 1000000, 1000000);
         }
         tabletBinding.setGyroscopeMode(!tabletBinding.getGyroscopeMode());
     }

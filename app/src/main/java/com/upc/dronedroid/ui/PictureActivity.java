@@ -58,7 +58,7 @@ public class PictureActivity extends AppCompatActivity {
                         Bitmap bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                         ImageView img = findViewById(R.id.imageView2);
                         img.setImageBitmap(bmp);
-                        //TODO: Try to use videoBuffer
+                        //TODO: Try using videoBuffer
 
                     }
                 };
@@ -255,7 +255,7 @@ public class PictureActivity extends AppCompatActivity {
                         Bitmap bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                         ImageView img = (ImageView) findViewById(R.id.imageView2);
                         img.setImageBitmap(bmp);
-                        //TODO: Try to use videoBuffer
+                        //TODO: Try using videoBuffer
                     }
                 };
                 IntentFilter filter = new IntentFilter("com.upc.dronedroid.VIDEO_STREAM");

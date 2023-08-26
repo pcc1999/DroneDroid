@@ -1,6 +1,7 @@
 package com.upc.dronedroid.ui;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -9,6 +10,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.StrictMode;
 import android.util.Log;
 import android.view.View;
@@ -30,6 +32,10 @@ import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.views.MapView;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Objects;
 
@@ -56,6 +62,34 @@ public class SplashActivity extends AppCompatActivity implements ActivityCompat.
         if (Build.VERSION.SDK_INT <= 24) {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
+        }
+        //Hide action bar
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.hide();
+        }
+        //Create tiles directory for offline maps and copy files from assets
+        File directory = new File(this.getExternalFilesDir("offlineMaps"), "tiles");
+        if (!directory.isDirectory()) {
+            directory.mkdirs();
+            try {
+                String[] offlineMaps = getAssets().list("offlineMaps");
+                for (String offlineMap : offlineMaps) {
+                    File newOfflineMap = new File(directory.getParent() + "/" + offlineMap);
+                    //Copy all the offline maps to the external directory
+                    InputStream is = getAssets().open("offlineMaps/" + offlineMap);
+                    byte buffer[] = new byte[1024];
+                    int length = 0;
+                    FileOutputStream fos = new FileOutputStream(newOfflineMap);
+                    while ((length = is.read(buffer)) > 0) {
+                        fos.write(buffer, 0, length);
+                    }
+                    is.close();
+                    fos.close();
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
         handleMap();
     }
@@ -91,7 +125,7 @@ public class SplashActivity extends AppCompatActivity implements ActivityCompat.
 
                 // Display a SnackBar with an explanation and a button to trigger the request.
                 Snackbar.make(findViewById(R.id.main_layout), "Please provide permissions for location in order to show properly the maps",
-                        Snackbar.LENGTH_INDEFINITE)
+                                Snackbar.LENGTH_INDEFINITE)
                         .setAction("OK", view -> ActivityCompat
                                 .requestPermissions(SplashActivity.this, permissionsLocation,
                                         requestCodeLocation)).show();

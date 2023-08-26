@@ -159,7 +159,15 @@ public class FlightPlansTabletActivity extends AppCompatActivity {
 
         //Get current location from locationUtil
         LocationUtil locationUtil = LocationUtil.getLocationUtilInstance(this);
-        double[] latlon = locationUtil.getLocation();
+        double[] latlon = new double[2];
+        try {
+            latlon = locationUtil.getLocation();
+        } catch (Exception e) {
+            e.printStackTrace();
+            //Fallback to DroneLab
+            latlon[0] = 41.276271;
+            latlon[1] = 1.988435;
+        }
 
         //Set marker for user's position
         MapView mapView = findViewById(R.id.OSMView);
@@ -186,7 +194,7 @@ public class FlightPlansTabletActivity extends AppCompatActivity {
         ContextCompat.registerReceiver(this, brDeletedWaypoint, deleteFilter, ContextCompat.RECEIVER_NOT_EXPORTED);
 
 
-        //TODO: The map tiles in this activity will be the same as were set up in the previous activity - Must be informed through intent
+        //TODO: The map tiles in this activity should be the same as were set up in the previous activity - Must be informed through intent
         loadFPsList(mapView, mapController);
     }
 

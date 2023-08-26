@@ -15,7 +15,6 @@ public class AssetsUtil {
         InputStream is;
         try {
             if (uriImport == null) {
-                String test = activity.getExternalFilesDir("FlightPlans").toString() + "/" + filename;
                 Uri uri = Uri.fromFile(new File(activity.getExternalFilesDir("FlightPlans").toString() + "/" + filename));
                 is = activity.getContentResolver().openInputStream(uri);
             } else {
